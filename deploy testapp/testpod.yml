@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: miniapp-pod
+spec:
+  containers:
+    - name: miniapp
+      image: temaotl/temaotl-test-app:latest
+      ports:
+        - containerPort: 4000
+  

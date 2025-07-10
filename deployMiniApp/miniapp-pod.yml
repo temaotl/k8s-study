@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: miniapp-pod
+  labels:
+    app: miniapp
+    env: dev
+spec:
+  containers:
+    - name: miniapp
+      image: temaotl/miniapp:1.0.1
+      ports:
+        - containerPort: 4000
+      envFrom:
+        - configMapRef:
+            name: miniapp-config
+  

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testapp-back-deployment
+  labels:
+    app: testapp-back
+    version: v1
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: testapp-back
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: testapp-back
+        version: v1
+    spec:
+      containers:
+        - name: testapp-back
+          image: temaotl/temaotl-test-app:latest
+          ports:
+            - name: back-port
+              containerPort: 4000
+          env:
+            - name: DB_HOST
+              value: testapp-bd-mariadb 
+          envFrom:
+            - secretRef:
+                name: back-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testapp-back-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: testapp-back
+  ports:
+    - name: testapp-back-port-service
+      port: 4000
+      targetPort: back-port

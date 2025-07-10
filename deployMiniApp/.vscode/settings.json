@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "kubernetes://schema/v1%40service": "file:///home/artem/Desktop/cesnet/workstudy/workstudy/k8s/deployMiniApp/miniapp-deployment-with-service.yml"
+    }
+}

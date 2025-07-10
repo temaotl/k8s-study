@@ -1,0 +1,14 @@
+# Use official Python image as base
+FROM node:latest
+# Set working directory
+WORKDIR /app
+
+
+# Copy application code
+COPY . .
+
+RUN npm install
+
+EXPOSE 4000
+
+ENTRYPOINT ["node", "index.js"]

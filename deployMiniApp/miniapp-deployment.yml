@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: miniapp-deployment
+    labels:
+        app: miniapp
+        version: v1
+spec:
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+        matchLabels:
+            app: miniapp
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+    template:
+        metadata:
+            labels:
+                app: miniapp
+                version: v1
+        spec:
+            containers:
+            - name: miniapp
+              image: temaotl/miniapp:1.0.1
+              ports:
+              - containerPort: 4000
+

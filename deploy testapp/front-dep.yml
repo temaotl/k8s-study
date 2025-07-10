@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testapp-front-deployment
+  labels:
+    app: testapp-front
+    version: v1
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: testapp-front
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: testapp-front
+        version: v1
+    spec:
+      containers:
+        - name: testapp-front
+          image: temaotl/testapp-front:latest
+          ports:
+            - name: front-port
+              containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testapp-front-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: testapp-front
+  ports:
+    - name: testapp-front-port-service
+      port: 80
+      targetPort: front-port

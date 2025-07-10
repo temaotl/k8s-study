@@ -1,0 +1,44 @@
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    networks:
+    - aplication-networks
+  
+  back:
+    build: ./back
+    ports:
+      - "4000:4000"
+    networks:
+    - aplication-networks
+    env_file:
+      - ./back.env
+    depends_on:
+    - db
+
+  nginx:
+    build: 
+      context: ./  # теперь контекст включает и nginx, и front
+      dockerfile: ./nginx_config/dockerfile
+    ports:
+      - 8000:8000
+    networks:
+      - aplication-networks
+    depends_on:
+      - back
+  
+    
+networks:
+  aplication-networks:
+    name: app-net
+    driver: bridge
+volumes:
+  dbdata:

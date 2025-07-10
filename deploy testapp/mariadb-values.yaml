@@ -1,0 +1,6 @@
+
+auth:
+  existingSecret: mariadb-credentials
+  existingSecretRootPasswordKey: mariadb-root-password
+
+  database:       number_app
