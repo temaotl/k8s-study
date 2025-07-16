@@ -35,6 +35,7 @@ spec:
             - secretRef:
                 name: back-credentials
 ---
+# service was left as usual due to the excess of service traffic 
 apiVersion: v1
 kind: Service
 metadata:

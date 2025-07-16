@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   # name: testapp-ingress
 spec:
-  ingressClassName: traefik
   rules:
     - host: testapp
       http:
