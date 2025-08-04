@@ -21,6 +21,7 @@ metadata:
 spec:
   entryPoints:
     - web
+    - websecure
   routes:
     - match: Host(`testapp.localhost`) && PathPrefix(`/api`)
       kind: Rule
