@@ -3,11 +3,11 @@ kind: IngressRoute
 metadata:
   annotations:
     cert-manager.io/issuer: selfsigned-issuer
-  name: testapp-route
+  name: testapp-route-cert
   namespace: default    
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: Host(`testapp.localhost`) && PathPrefix(`/`) && !PathPrefix(`/api`)
       kind: Rule
@@ -15,3 +15,6 @@ spec:
         - name: testapp-front-svc
           kind: Service
           port: 80
+
+  tls:
+    secretName: testapp-tls-cert

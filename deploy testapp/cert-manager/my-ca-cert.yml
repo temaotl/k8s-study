@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: root-ca
+spec:
+  secretName: root-ca-secret
+  isCA: true
+  commonName: "root-ca.localhost"
+  duration: 87600h   
+  renewBefore: 720h  
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
