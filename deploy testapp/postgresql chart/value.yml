@@ -1,0 +1,8 @@
+auth:
+  existingSecret: postgres-secret
+  username: abobus
+  database:  testdb
+
+primary:
+  initdb:
+    scriptsConfigMap: pg-init-scripts
