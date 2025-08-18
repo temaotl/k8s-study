@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-unprivileged
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-unprivileged
+  template:
+    metadata:
+      labels:
+        app: nginx-unprivileged
+    spec:
+      securityContext:
+        fsGroup: 101
+
+      volumes:
+        - name: nginx-storage
+          persistentVolumeClaim:
+            claimName: nginx-pvc
+        - name: index-cm
+          configMap:
+            name: nginx-index
+            items:
+              - key: index.html
+                path: index.html
+      containers:
+        - name: nginx-unprivileged
+          image: nginxinc/nginx-unprivileged:alpine3.22-perl
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 101
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          ports:
+            - name: http
+              containerPort: 8080
+
+          volumeMounts:
+            - name: nginx-storage
+              mountPath: /usr/share/nginx/html
+
+            - name: index-cm
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+              readOnly: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-unprivileged
+spec:
+  selector:
+    app: nginx-unprivileged
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
