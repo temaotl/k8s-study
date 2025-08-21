@@ -1,0 +1,89 @@
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: "nginx-unprivileged"
+
+image:
+  repository: nginxinc/nginx-unprivileged
+  tag: "stable"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  name: ingress-index
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: mynginx.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+configMap:
+  enabled: true
+  name: nginx-index
+  volumeName: index-cm
+  data:
+    index.html: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Hello Word</title>
+        <style>
+          body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+          h1 { color: #2e7d32; }
+        </style>
+      </head>
+      <body>
+        <h1> It works!</h1>
+      </body>
+      </html>
+  mount:
+    enabled: true
+    mountPath: /usr/share/nginx/html/index.html
+    subPath: index.html
+
+persistence:
+  create: true
+  claimName: "nginx-pvc"
+  existingClaim: ""
+  storageClassName: standard
+  accessModes: ["ReadWriteOnce"]
+  size: 1Gi
+  mountPath: /usr/share/nginx/html
+  readOnly: false
+  volumeName: nginx-storage
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+
+imagePullSecrets: []
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 101
+
+containerSecurityContext:
+  runAsUser: 101
+  runAsGroup: 101
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+
+env: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

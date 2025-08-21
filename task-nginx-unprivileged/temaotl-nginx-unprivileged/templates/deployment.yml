@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "temaotl-nginx-unprivileged.fullname" . }}
+  labels:
+    {{- include "temaotl-nginx-unprivileged.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "temaotl-nginx-unprivileged.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "temaotl-nginx-unprivileged.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- $p := .Values.persistence -}}
+      {{- $cm := .Values.configMap -}}
+
+      {{- if or (or $p.create $p.existingClaim) (and $cm.enabled $cm.mount.enabled) }}
+      volumes:
+        {{- if or $p.create $p.existingClaim }}
+        - name: {{ default "nginx-storage" $p.volumeName }}
+          persistentVolumeClaim:
+            claimName: {{ coalesce $p.existingClaim $p.claimName | required "persistence.claimName or existingClaim is required" }}
+        {{- end }}
+        {{- if and $cm.enabled $cm.mount.enabled }}
+        - name: {{ default "index-cm" $cm.volumeName }}
+          configMap:
+            name: {{ required "configMap.name is required" $cm.name }}
+            {{- if $cm.mount.subPath }}
+            items:
+              - key: {{ $cm.mount.subPath }}
+                path: {{ $cm.mount.subPath }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+
+      containers:
+        - name: {{ include "temaotl-nginx-unprivileged.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+
+          {{- if or (or $p.create $p.existingClaim) (and $cm.enabled $cm.mount.enabled) }}
+          volumeMounts:
+            {{- if or $p.create $p.existingClaim }}
+            - name: {{ default "nginx-storage" $p.volumeName }}
+              mountPath: {{ required "persistence.mountPath is required" $p.mountPath }}
+              readOnly: {{ $p.readOnly | default false }}
+            {{- end }}
+            {{- if and $cm.enabled $cm.mount.enabled }}
+            - name: {{ default "index-cm" $cm.volumeName }}
+              mountPath: {{ required "configMap.mount.mountPath is required" $cm.mount.mountPath }}
+              subPath: {{ required "configMap.mount.subPath is required" $cm.mount.subPath }}
+              readOnly: true
+            {{- end }}
+          {{- end }}
+
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
